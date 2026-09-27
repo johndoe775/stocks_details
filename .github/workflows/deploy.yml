@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Debug - Check if secret is set
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_WORKER_URL }}" ]; then
+            echo "ERROR: CLOUDFLARE_WORKER_URL secret is EMPTY or NOT SET!"
+            echo "Add it under Settings > Environments > github-pages > Environment secrets"
+            exit 1
+          else
+            echo "Secret is set (value hidden for security)"
+          fi
+
+      - name: Inject GitHub Secrets into index.html
+        env:
+          WORKER_URL: ${{ secrets.CLOUDFLARE_WORKER_URL }}
+        run: |
+          echo "Replacing placeholder with secret value..."
+          # Use awk for safe replacement (avoids sed delimiter issues)
+          awk -v url="$WORKER_URL" '{gsub(/__CLOUDFLARE_WORKER_URL__/, url); print}' index.html > index.tmp && mv index.tmp index.html
+          echo "--- Verifying replacement ---"
+          grep "CLOUDFLARE_WORKER_URL" index.html | head -3
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
