@@ -1,1145 +1,1164 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Daily ETF Performance vs NIFTY">
-    <title>Daily ETF Performance vs NIFTY</title>
-    <style>
-        * {
-            box-sizing: border-box
-        }
-
-        html {
-            color-scheme: light
-        }
-
-        body {
-            margin: 0;
-            padding: 8px;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #222;
-            background: #fff
-        }
-
-        h2 {
-            font-size: 16px;
-            margin: 4px 0 8px
-        }
-
-        .nifty-box {
-            margin-bottom: 8px;
-            padding: 7px 8px;
-            background: #f4f6fa;
-            border: 1px solid #ccc
-        }
-
-        .nifty-label {
-            font-size: 10px;
-            color: #555
-        }
-
-        .nifty-level {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 2px
-        }
-
-        .nifty-date {
-            font-size: 9px;
-            color: #777;
-            margin-top: 2px
-        }
-
-        .table-wrap {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch
-        }
-
-        table {
-            border-collapse: collapse;
-            width: auto;
-            min-width: 100%;
-            table-layout: auto
-        }
-
-        th,
-        td {
-            border: 1px solid #ccc;
-            padding: 4px 6px;
-            text-align: left;
-            white-space: nowrap;
-            font-size: 10px
-        }
-
-        th {
-            background: #d9e2f3;
-            font-weight: bold
-        }
-
-        td.asset {
-            background: #f4f6fa
-        }
-
-        td.error {
-            color: #b30000
-        }
-
-        footer {
-            margin-top: 7px;
-            font-size: 8px;
-            color: #777;
-            text-align: left
-        }
-
-        .mobile-cards {
-            display: none
-        }
-
-        .mcard {
-            border: 1px solid #ccc;
-            margin-bottom: 6px;
-            background: #f4f6fa;
-            padding: 7px
-        }
-
-        .mname {
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 5px
-        }
-
-        .mgrid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 3px
-        }
-
-        .metric {
-            border: 1px solid #ccc;
-            background: #fff;
-            padding: 4px;
-            text-align: center
-        }
-
-        .metric-label {
-            font-size: 8px;
-            color: #666
-        }
-
-        .metric-value {
-            font-size: 10px;
-            font-weight: bold;
-            margin-top: 2px
-        }
-
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 7px
-        }
-
-        button {
-            border: 1px solid #aaa;
-            background: #f4f6fa;
-            padding: 6px 10px;
-            font-size: 10px;
-            cursor: pointer
-        }
-
-        #status {
-            font-size: 9px;
-            color: #777
-        }
-
-        #error {
-            display: none;
-            color: #b30000;
-            font-size: 10px;
-            border: 1px solid #ffcccc;
-            background: #fff2f2;
-            padding: 6px;
-            margin-bottom: 7px
-        }
-
-        @media(max-width:600px) {
-            .desktop-table {
-                display: none
-            }
-
-            .mobile-cards {
-                display: block
-            }
-
-            .mgrid {
-                grid-template-columns: repeat(5, 1fr)
-            }
-
-            .toolbar button {
-                padding: 7px 10px
-            }
-        }
-
-        @media(min-width:601px) {
-            .mobile-cards {
-                display: none
-            }
-        }
-    </style>
-
-    <style>
-        :root {
-            --bg: #070b12;
-            --panel: #0d131d;
-            --panel2: #111925;
-            --line: #202b3b;
-            --text: #eef3f8;
-            --muted: #8190a5;
-            --accent: #72a7ff;
-            --green: #35d07f;
-        }
-
-        body {
-            background:
-                radial-gradient(circle at 10% 0%, rgba(71, 115, 180, .13), transparent 30%),
-                radial-gradient(circle at 90% 10%, rgba(68, 201, 145, .07), transparent 26%),
-                var(--bg) !important;
-            color: var(--text) !important;
-        }
-
-        .dashboard-shell {
-            max-width: 1280px;
-            margin: auto;
-            padding: 28px 20px 48px
-        }
-
-        .hero {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            gap: 20px;
-            margin-bottom: 24px
-        }
-
-        .eyebrow {
-            font-size: 11px;
-            letter-spacing: .18em;
-            text-transform: uppercase;
-            color: var(--accent);
-            font-weight: 700
-        }
-
-        .hero h1 {
-            font-size: 32px;
-            line-height: 1.1;
-            margin: 7px 0 8px;
-            font-weight: 750;
-            letter-spacing: -.03em
-        }
-
-        .hero p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 14px
-        }
-
-        .status {
-            border: 1px solid var(--line);
-            background: rgba(13, 19, 29, .8);
-            border-radius: 14px;
-            padding: 11px 14px;
-            min-width: 150px
-        }
-
-        .status-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: .12em;
-            color: var(--muted)
-        }
-
-        .status-value {
-            margin-top: 4px;
-            font-size: 13px;
-            font-weight: 650
-        }
-
-        .status-dot {
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: var(--green);
-            margin-right: 7px
-        }
-
-        .kpis {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 18px
-        }
-
-        .kpi {
-            background: linear-gradient(145deg, rgba(17, 25, 37, .96), rgba(11, 16, 25, .96));
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 16px 17px
-        }
-
-        .kpi-label {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: .12em;
-            color: var(--muted)
-        }
-
-        .kpi-value {
-            font-size: 21px;
-            font-weight: 700;
-            margin-top: 8px;
-            letter-spacing: -.02em
-        }
-
-        .market-card {
-            border: 1px solid var(--line);
-            border-radius: 20px;
-            overflow: hidden;
-            background: rgba(10, 15, 23, .88);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, .22)
-        }
-
-        .market-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 20px;
-            border-bottom: 1px solid var(--line)
-        }
-
-        .market-title {
-            font-size: 15px;
-            font-weight: 700
-        }
-
-        .market-sub {
-            font-size: 12px;
-            color: var(--muted);
-            margin-top: 4px
-        }
-
-        .legend {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap
-        }
-
-        .legend span {
-            font-size: 10px;
-            padding: 5px 8px;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            color: var(--muted)
-        }
-
-        .table-wrap {
-            overflow-x: auto
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse
-        }
-
-        thead th {
-            background: #0b111a;
-            color: #738197;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: .13em;
-            font-weight: 700;
-            padding: 13px 16px;
-            text-align: right;
-            border-bottom: 1px solid var(--line);
-            white-space: nowrap
-        }
-
-        thead th:first-child {
-            text-align: left
-        }
-
-        tbody td {
-            padding: 15px 16px;
-            border-bottom: 1px solid #182231;
-            font-size: 13px;
-            text-align: right
-        }
-
-        tbody td:first-child {
-            text-align: left
-        }
-
-        tbody tr:hover {
-            background: rgba(114, 167, 255, .035)
-        }
-
-        .etf-name {
-            font-weight: 650;
-            color: #edf2f7
-        }
-
-        .etf-code {
-            font-size: 10px;
-            color: #68788f;
-            margin-top: 3px
-        }
-
-        .nifty-row {
-            background: rgba(114, 167, 255, .045)
-        }
-
-        .nifty-row .etf-name {
-            color: #9ec2ff
-        }
-
-        .perf {
-            display: inline-flex;
-            min-width: 70px;
-            justify-content: flex-end;
-            font-variant-numeric: tabular-nums;
-            font-weight: 700;
-            padding: 6px 8px;
-            border-radius: 8px;
-            color: #fff
-        }
-
-        .empty {
-            color: #536277
-        }
-
-        .footer-note {
-            color: #64748b;
-            font-size: 11px;
-            margin-top: 12px;
-            text-align: right
-        }
-
-        .mobile-grid {
-            display: none
-        }
-
-        @media(max-width:800px) {
-            .dashboard-shell {
-                padding: 20px 14px 34px
-            }
-
-            .hero {
-                align-items: flex-start;
-                flex-direction: column
-            }
-
-            .hero h1 {
-                font-size: 27px
-            }
-
-            .status {
-                width: 100%;
-                box-sizing: border-box
-            }
-
-            .kpis {
-                grid-template-columns: repeat(2, 1fr)
-            }
-
-            .market-head {
-                align-items: flex-start;
-                gap: 12px;
-                flex-direction: column
-            }
-
-            .legend {
-                display: none
-            }
-
-            .table-wrap {
-                display: none
-            }
-
-            .mobile-grid {
-                display: grid;
-                gap: 10px;
-                padding: 12px
-            }
-
-            .mobile-card {
-                background: #0d141f;
-                border: 1px solid var(--line);
-                border-radius: 15px;
-                padding: 14px
-            }
-
-            .mobile-top {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 12px
-            }
-
-            .mobile-metrics {
-                display: grid;
-                grid-template-columns: repeat(5, 1fr);
-                gap: 5px
-            }
-
-            .mobile-metric {
-                background: #101a28;
-                border-radius: 9px;
-                padding: 7px 4px;
-                text-align: center
-            }
-
-            .mobile-metric label {
-                display: block;
-                font-size: 8px;
-                color: #64748b;
-                margin-bottom: 4px
-            }
-
-            .mobile-metric div {
-                font-size: 10px;
-                font-weight: 700
-            }
-        }
-
-        @media(max-width:460px) {
-            .mobile-metrics {
-                grid-template-columns: repeat(3, 1fr)
-            }
-        }
-    </style>
-
-    <style>
-        /* Minimal modern UI override */
-        :root {
-            --bg: #080a0d;
-            --panel: #0d1014;
-            --line: #1b2027;
-            --text: #f1f3f5;
-            --muted: #737b86;
-            --blue: #8ab4f8;
-            --green: #4ade80;
-        }
-
-        * {
-            box-sizing: border-box
-        }
-
-        body {
-            margin: 0 !important;
-            background: var(--bg) !important;
-            color: var(--text) !important;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-        }
-
-        .dashboard-shell {
-            max-width: 1180px;
-            margin: 0 auto;
-            padding: 42px 24px 56px
-        }
-
-        .hero {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 30px
-        }
-
-        .eyebrow {
-            color: var(--muted);
-            font-size: 10px;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            font-weight: 600
-        }
-
-        .hero h1 {
-            margin: 8px 0 7px;
-            font-size: 28px;
-            line-height: 1.15;
-            letter-spacing: -.035em;
-            font-weight: 650
-        }
-
-        .hero p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 13px
-        }
-
-        .status {
-            border: 0 !important;
-            background: transparent !important;
-            padding: 0 !important;
-            min-width: auto !important;
-            text-align: right
-        }
-
-        .status-label {
-            display: none
-        }
-
-        .status-value {
-            margin: 0 !important;
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 500
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            background: #4ade80;
-            margin-right: 6px
-        }
-
-        .kpis {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1px;
-            background: var(--line);
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 18px
-        }
-
-        .kpi {
-            background: var(--panel) !important;
-            border: 0 !important;
-            border-radius: 0 !important;
-            padding: 15px 17px
-        }
-
-        .kpi-label {
-            font-size: 9px;
-            color: var(--muted);
-            letter-spacing: .12em
-        }
-
-        .kpi-value {
-            font-size: 17px;
-            margin-top: 6px;
-            font-weight: 650;
-            letter-spacing: -.02em
-        }
-
-        .market-card {
-            background: var(--panel) !important;
-            border: 1px solid var(--line) !important;
-            border-radius: 12px !important;
-            box-shadow: none !important;
-            overflow: hidden
-        }
-
-        .market-head {
-            padding: 15px 18px !important;
-            border-bottom: 1px solid var(--line) !important
-        }
-
-        .market-title {
-            font-size: 13px !important;
-            font-weight: 600 !important
-        }
-
-        .market-sub {
-            font-size: 11px !important;
-            color: var(--muted) !important;
-            margin-top: 3px !important
-        }
-
-        .legend {
-            gap: 5px !important
-        }
-
-        .legend span {
-            border: 1px solid var(--line) !important;
-            background: transparent !important;
-            font-size: 9px !important;
-            padding: 4px 7px !important;
-            color: var(--muted) !important
-        }
-
-        table {
-            border-collapse: collapse !important
-        }
-
-        thead th {
-            background: #0b0e12 !important;
-            color: #59616d !important;
-            font-size: 9px !important;
-            letter-spacing: .12em !important;
-            padding: 11px 15px !important;
-            border-bottom: 1px solid var(--line) !important
-        }
-
-        tbody td {
-            padding: 13px 15px !important;
-            border-bottom: 1px solid #15191f !important;
-            font-size: 12px !important
-        }
-
-        tbody tr:hover {
-            background: #10141a !important
-        }
-
-        .etf-name {
-            font-size: 12px !important;
-            font-weight: 600 !important
-        }
-
-        .etf-code {
-            font-size: 9px !important;
-            color: #59616d !important
-        }
-
-        .nifty-row {
-            background: #0f1318 !important
-        }
-
-        .nifty-row .etf-name {
-            color: #fff !important
-        }
-
-        .perf {
-            min-width: 58px !important;
-            padding: 4px 6px !important;
-            border-radius: 5px !important;
-            font-size: 11px !important;
-            color: #fff !important
-        }
-
-        .footer-note {
-            font-size: 9px !important;
-            color: #505864 !important;
-            margin-top: 9px !important
-        }
-
-        @media(max-width:800px) {
-            .dashboard-shell {
-                padding: 26px 14px 40px
-            }
-
-            .hero {
-                margin-bottom: 22px
-            }
-
-            .hero h1 {
-                font-size: 24px
-            }
-
-            .kpis {
-                grid-template-columns: repeat(2, 1fr);
-                margin-bottom: 14px
-            }
-
-            .market-head {
-                padding: 14px !important
-            }
-
-            .table-wrap {
-                display: none
-            }
-
-            .mobile-grid {
-                display: grid !important;
-                gap: 7px !important;
-                padding: 8px !important
-            }
-
-            .mobile-card {
-                background: #0d1014 !important;
-                border: 1px solid var(--line) !important;
-                border-radius: 10px !important;
-                padding: 12px !important
-            }
-
-            .mobile-metrics {
-                gap: 4px !important
-            }
-
-            .mobile-metric {
-                background: #11151a !important;
-                border-radius: 6px !important;
-                padding: 6px 3px !important
-            }
-
-            .mobile-metric label {
-                font-size: 7px !important;
-                color: #59616d !important
-            }
-
-            .mobile-metric div {
-                font-size: 9px !important
-            }
-        }
-
-        @media(max-width:460px) {
-            .dashboard-shell {
-                padding-left: 10px;
-                padding-right: 10px
-            }
-        }
-    </style>
-
-    <style>
-        /* Mobile-first readability layer */
-        body {
-            background: #07090c !important
-        }
-
-        .dashboard-shell {
-            max-width: 1200px !important;
-            padding: 32px 22px 48px !important
-        }
-
-        .hero {
-            margin-bottom: 24px !important
-        }
-
-        .hero h1 {
-            font-size: 30px !important;
-            font-weight: 700 !important
-        }
-
-        .kpis {
-            display: none !important
-        }
-
-        .market-card {
-            border-radius: 14px !important
-        }
-
-        .market-head {
-            padding: 16px 18px !important
-        }
-
-        .table-wrap {
-            overflow-x: auto !important
-        }
-
-        table {
-            min-width: 720px !important
-        }
-
-        thead th {
-            padding: 11px 14px !important
-        }
-
-        tbody td {
-            padding: 14px !important
-        }
-
-        .etf-name {
-            font-size: 13px !important
-        }
-
-        .perf {
-            min-width: 64px !important;
-            font-size: 12px !important;
-            padding: 6px 7px !important;
-            color: #fff !important
-        }
-
-        /* Desktop stays table-based */
-        .mobile-grid {
-            display: none !important
-        }
-
-        @media(max-width:800px) {
-            .dashboard-shell {
-                padding: 22px 10px 32px !important
-            }
-
-            .hero {
-                margin: 0 4px 18px !important
-            }
-
-            .hero h1 {
-                font-size: 25px !important;
-                margin-top: 6px !important
-            }
-
-            .hero p {
-                font-size: 11px !important
-            }
-
-            .status {
-                margin-top: 2px !important
-            }
-
-            .market-card {
-                border: 0 !important;
-                background: transparent !important;
-                box-shadow: none !important
-            }
-
-            .market-head {
-                padding: 0 4px 12px !important;
-                border: 0 !important
-            }
-
-            .market-title {
-                font-size: 14px !important
-            }
-
-            .market-sub {
-                font-size: 10px !important
-            }
-
-            .table-wrap {
-                display: none !important
-            }
-
-            .mobile-grid {
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 7px !important;
-                padding: 0 !important
-            }
-
-            .mobile-card {
-                background: #0d1116 !important;
-                border: 1px solid #1b2129 !important;
-                border-radius: 11px !important;
-                padding: 13px 11px !important
-            }
-
-            .mobile-top {
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                margin-bottom: 10px !important
-            }
-
-            .mobile-top .etf-name {
-                font-size: 13px !important
-            }
-
-            .mobile-top .etf-code {
-                font-size: 9px !important
-            }
-
-            .mobile-metrics {
-                display: grid !important;
-                grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-                gap: 4px !important
-            }
-
-            .mobile-metric {
-                min-width: 0 !important;
-                background: #11161c !important;
-                border-radius: 7px !important;
-                padding: 7px 2px 8px !important;
-                text-align: center !important
-            }
-
-            .mobile-metric label {
-                display: block !important;
-                font-size: 8px !important;
-                line-height: 1 !important;
-                color: #68727f !important;
-                margin-bottom: 5px !important;
-                font-weight: 600 !important
-            }
-
-            .mobile-metric div {
-                font-size: 11px !important;
-                line-height: 1 !important;
-                font-weight: 750 !important;
-                white-space: nowrap !important
-            }
-
-            .footer-note {
-                text-align: center !important;
-                margin-top: 9px !important;
-                font-size: 9px !important
-            }
-        }
-
-        @media(max-width:430px) {
-            .dashboard-shell {
-                padding-left: 8px !important;
-                padding-right: 8px !important
-            }
-
-            .mobile-card {
-                padding: 12px 8px !important
-            }
-
-            .mobile-metrics {
-                gap: 3px !important
-            }
-
-            .mobile-metric {
-                padding: 7px 1px 8px !important
-            }
-
-            .mobile-metric label {
-                font-size: 7px !important
-            }
-
-            .mobile-metric div {
-                font-size: 10px !important
-            }
-        }
-    </style>
-
-    <style>
-        /* ===== New card-first market board ===== */
-        body {
-            background: #06080b !important
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Daily ETF Performance vs NIFTY">
+<title>Daily ETF Performance vs NIFTY</title>
+<style>
+  *{box-sizing:border-box}
+  html{color-scheme:light}
+  body{margin:0;padding:8px;font-family:Arial,Helvetica,sans-serif;color:#222;background:#fff}
+  h2{font-size:16px;margin:4px 0 8px}
+  .nifty-box{margin-bottom:8px;padding:7px 8px;background:#f4f6fa;border:1px solid #ccc}
+  .nifty-label{font-size:10px;color:#555}
+  .nifty-level{font-size:18px;font-weight:bold;margin-top:2px}
+  .nifty-date{font-size:9px;color:#777;margin-top:2px}
+  .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:auto;min-width:100%;table-layout:auto}
+  th,td{border:1px solid #ccc;padding:4px 6px;text-align:left;white-space:nowrap;font-size:10px}
+  th{background:#d9e2f3;font-weight:bold}
+  td.asset{background:#f4f6fa}
+  td.error{color:#b30000}
+  footer{margin-top:7px;font-size:8px;color:#777;text-align:left}
+  .mobile-cards{display:none}
+  .mcard{border:1px solid #ccc;margin-bottom:6px;background:#f4f6fa;padding:7px}
+  .mname{font-size:11px;font-weight:bold;margin-bottom:5px}
+  .mgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+  .metric{border:1px solid #ccc;background:#fff;padding:4px;text-align:center}
+  .metric-label{font-size:8px;color:#666}
+  .metric-value{font-size:10px;font-weight:bold;margin-top:2px}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+  button{border:1px solid #aaa;background:#f4f6fa;padding:6px 10px;font-size:10px;cursor:pointer}
+  #status{font-size:9px;color:#777}
+  #error{display:none;color:#b30000;font-size:10px;border:1px solid #ffcccc;background:#fff2f2;padding:6px;margin-bottom:7px}
+  @media(max-width:600px){
+    .desktop-table{display:none}
+    .mobile-cards{display:block}
+    .mgrid{grid-template-columns:repeat(5,1fr)}
+    .toolbar button{padding:7px 10px}
+  }
+  @media(min-width:601px){
+    .mobile-cards{display:none}
+  }
+</style>
+
+<style>
+:root{
+  --bg:#070b12;--panel:#0d131d;--panel2:#111925;--line:#202b3b;
+  --text:#eef3f8;--muted:#8190a5;--accent:#72a7ff;--green:#35d07f;
+}
+body{
+  background:
+    radial-gradient(circle at 10% 0%,rgba(71,115,180,.13),transparent 30%),
+    radial-gradient(circle at 90% 10%,rgba(68,201,145,.07),transparent 26%),
+    var(--bg)!important;
+  color:var(--text)!important;
+}
+.dashboard-shell{max-width:1280px;margin:auto;padding:28px 20px 48px}
+.hero{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+  margin-bottom:24px
+}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.hero h1{font-size:32px;line-height:1.1;margin:7px 0 8px;font-weight:750;letter-spacing:-.03em}
+.hero p{margin:0;color:var(--muted);font-size:14px}
+.status{
+  border:1px solid var(--line);background:rgba(13,19,29,.8);border-radius:14px;
+  padding:11px 14px;min-width:150px
+}
+.status-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.status-value{margin-top:4px;font-size:13px;font-weight:650}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:7px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{
+  background:linear-gradient(145deg,rgba(17,25,37,.96),rgba(11,16,25,.96));
+  border:1px solid var(--line);border-radius:16px;padding:16px 17px
+}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.kpi-value{font-size:21px;font-weight:700;margin-top:8px;letter-spacing:-.02em}
+.market-card{
+  border:1px solid var(--line);border-radius:20px;overflow:hidden;
+  background:rgba(10,15,23,.88);box-shadow:0 20px 50px rgba(0,0,0,.22)
+}
+.market-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 20px;border-bottom:1px solid var(--line)
+}
+.market-title{font-size:15px;font-weight:700}
+.market-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.legend{display:flex;gap:8px;flex-wrap:wrap}
+.legend span{font-size:10px;padding:5px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{
+  background:#0b111a;color:#738197;font-size:10px;text-transform:uppercase;
+  letter-spacing:.13em;font-weight:700;padding:13px 16px;text-align:right;
+  border-bottom:1px solid var(--line);white-space:nowrap
+}
+thead th:first-child{text-align:left}
+tbody td{padding:15px 16px;border-bottom:1px solid #182231;font-size:13px;text-align:right}
+tbody td:first-child{text-align:left}
+tbody tr:hover{background:rgba(114,167,255,.035)}
+.etf-name{font-weight:650;color:#edf2f7}
+.etf-code{font-size:10px;color:#68788f;margin-top:3px}
+.nifty-row{background:rgba(114,167,255,.045)}
+.nifty-row .etf-name{color:#9ec2ff}
+.perf{
+  display:inline-flex;min-width:70px;justify-content:flex-end;
+  font-variant-numeric:tabular-nums;font-weight:700;padding:6px 8px;border-radius:8px
+}
+.empty{color:#536277}
+.footer-note{color:#64748b;font-size:11px;margin-top:12px;text-align:right}
+.mobile-grid{display:none}
+@media(max-width:800px){
+  .dashboard-shell{padding:20px 14px 34px}
+  .hero{align-items:flex-start;flex-direction:column}
+  .hero h1{font-size:27px}
+  .status{width:100%;box-sizing:border-box}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .market-head{align-items:flex-start;gap:12px;flex-direction:column}
+  .legend{display:none}
+  .table-wrap{display:none}
+  .mobile-grid{display:grid;gap:10px;padding:12px}
+  .mobile-card{background:#0d141f;border:1px solid var(--line);border-radius:15px;padding:14px}
+  .mobile-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .mobile-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .mobile-metric{background:#101a28;border-radius:9px;padding:7px 4px;text-align:center}
+  .mobile-metric label{display:block;font-size:8px;color:#64748b;margin-bottom:4px}
+  .mobile-metric div{font-size:10px;font-weight:700}
+}
+@media(max-width:460px){
+  .mobile-metrics{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+
+<style>
+/* Minimal modern UI override */
+:root{
+  --bg:#080a0d;--panel:#0d1014;--line:#1b2027;--text:#f1f3f5;
+  --muted:#737b86;--blue:#8ab4f8;--green:#4ade80;
+}
+*{box-sizing:border-box}
+body{
+  margin:0!important;
+  background:var(--bg)!important;
+  color:var(--text)!important;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+.dashboard-shell{max-width:1180px;margin:0 auto;padding:42px 24px 56px}
+.hero{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:30px
+}
+.eyebrow{
+  color:var(--muted);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;font-weight:600
+}
+.hero h1{
+  margin:8px 0 7px;font-size:28px;line-height:1.15;
+  letter-spacing:-.035em;font-weight:650
+}
+.hero p{margin:0;color:var(--muted);font-size:13px}
+.status{
+  border:0!important;background:transparent!important;padding:0!important;
+  min-width:auto!important;text-align:right
+}
+.status-label{display:none}
+.status-value{margin:0!important;color:var(--muted);font-size:11px;font-weight:500}
+.status-dot{width:6px;height:6px;background:#4ade80;margin-right:6px}
+
+.kpis{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:1px;background:var(--line);border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;margin-bottom:18px
+}
+.kpi{background:var(--panel)!important;border:0!important;border-radius:0!important;padding:15px 17px}
+.kpi-label{font-size:9px;color:var(--muted);letter-spacing:.12em}
+.kpi-value{font-size:17px;margin-top:6px;font-weight:650;letter-spacing:-.02em}
+
+.market-card{
+  background:var(--panel)!important;border:1px solid var(--line)!important;
+  border-radius:12px!important;box-shadow:none!important;overflow:hidden
+}
+.market-head{
+  padding:15px 18px!important;border-bottom:1px solid var(--line)!important
+}
+.market-title{font-size:13px!important;font-weight:600!important}
+.market-sub{font-size:11px!important;color:var(--muted)!important;margin-top:3px!important}
+.legend{gap:5px!important}
+.legend span{
+  border:1px solid var(--line)!important;background:transparent!important;
+  font-size:9px!important;padding:4px 7px!important;color:var(--muted)!important
+}
+table{border-collapse:collapse!important}
+thead th{
+  background:#0b0e12!important;color:#59616d!important;
+  font-size:9px!important;letter-spacing:.12em!important;
+  padding:11px 15px!important;border-bottom:1px solid var(--line)!important
+}
+tbody td{
+  padding:13px 15px!important;border-bottom:1px solid #15191f!important;
+  font-size:12px!important
+}
+tbody tr:hover{background:#10141a!important}
+.etf-name{font-size:12px!important;font-weight:600!important}
+.etf-code{font-size:9px!important;color:#59616d!important}
+.nifty-row{background:#0f1318!important}
+.nifty-row .etf-name{color:#fff!important}
+.perf{
+  min-width:58px!important;padding:4px 6px!important;
+  border-radius:5px!important;font-size:11px!important
+}
+.footer-note{font-size:9px!important;color:#505864!important;margin-top:9px!important}
+
+@media(max-width:800px){
+  .dashboard-shell{padding:26px 14px 40px}
+  .hero{margin-bottom:22px}
+  .hero h1{font-size:24px}
+  .kpis{grid-template-columns:repeat(2,1fr);margin-bottom:14px}
+  .market-head{padding:14px!important}
+  .table-wrap{display:none}
+  .mobile-grid{display:grid!important;gap:7px!important;padding:8px!important}
+  .mobile-card{
+    background:#0d1014!important;border:1px solid var(--line)!important;
+    border-radius:10px!important;padding:12px!important
+  }
+  .mobile-metrics{gap:4px!important}
+  .mobile-metric{
+    background:#11151a!important;border-radius:6px!important;padding:6px 3px!important
+  }
+  .mobile-metric label{font-size:7px!important;color:#59616d!important}
+  .mobile-metric div{font-size:9px!important}
+}
+@media(max-width:460px){
+  .dashboard-shell{padding-left:10px;padding-right:10px}
+}
+</style>
+
+<style>
+/* Mobile-first readability layer */
+body{background:#07090c!important}
+.dashboard-shell{max-width:1200px!important;padding:32px 22px 48px!important}
+.hero{margin-bottom:24px!important}
+.hero h1{font-size:30px!important;font-weight:700!important}
+.kpis{display:none!important}
+.market-card{border-radius:14px!important}
+.market-head{padding:16px 18px!important}
+.table-wrap{overflow-x:auto!important}
+table{min-width:720px!important}
+thead th{padding:11px 14px!important}
+tbody td{padding:14px!important}
+.etf-name{font-size:13px!important}
+.perf{min-width:64px!important;font-size:12px!important;padding:6px 7px!important}
+
+/* Desktop stays table-based */
+.mobile-grid{display:none!important}
+
+@media(max-width:800px){
+  .dashboard-shell{padding:22px 10px 32px!important}
+  .hero{margin:0 4px 18px!important}
+  .hero h1{font-size:25px!important;margin-top:6px!important}
+  .hero p{font-size:11px!important}
+  .status{margin-top:2px!important}
+
+  .market-card{
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important
+  }
+  .market-head{
+    padding:0 4px 12px!important;
+    border:0!important
+  }
+  .market-title{font-size:14px!important}
+  .market-sub{font-size:10px!important}
+
+  .table-wrap{display:none!important}
+  .mobile-grid{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:7px!important;
+    padding:0!important
+  }
+  .mobile-card{
+    background:#0d1116!important;
+    border:1px solid #1b2129!important;
+    border-radius:11px!important;
+    padding:13px 11px!important
+  }
+  .mobile-top{
+    display:flex!important;
+    justify-content:space-between!important;
+    align-items:center!important;
+    margin-bottom:10px!important
+  }
+  .mobile-top .etf-name{font-size:13px!important}
+  .mobile-top .etf-code{font-size:9px!important}
+
+  .mobile-metrics{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:4px!important
+  }
+  .mobile-metric{
+    min-width:0!important;
+    background:#11161c!important;
+    border-radius:7px!important;
+    padding:7px 2px 8px!important;
+    text-align:center!important
+  }
+  .mobile-metric label{
+    display:block!important;
+    font-size:8px!important;
+    line-height:1!important;
+    color:#68727f!important;
+    margin-bottom:5px!important;
+    font-weight:600!important
+  }
+  .mobile-metric div{
+    font-size:11px!important;
+    line-height:1!important;
+    font-weight:750!important;
+    white-space:nowrap!important
+  }
+  .footer-note{text-align:center!important;margin-top:9px!important;font-size:9px!important}
+}
+
+@media(max-width:430px){
+  .dashboard-shell{padding-left:8px!important;padding-right:8px!important}
+  .mobile-card{padding:12px 8px!important}
+  .mobile-metrics{gap:3px!important}
+  .mobile-metric{padding:7px 1px 8px!important}
+  .mobile-metric label{font-size:7px!important}
+  .mobile-metric div{font-size:10px!important}
+}
+</style>
+
+<style>
+/* ===== New card-first market board ===== */
+body{background:#06080b!important}
+.dashboard-shell{max-width:1240px!important;padding:28px 20px 52px!important}
+.hero{
+  display:flex!important;justify-content:space-between!important;align-items:center!important;
+  padding:4px 2px 24px!important;border-bottom:1px solid #171c23!important;margin-bottom:20px!important
+}
+.eyebrow{font-size:9px!important;letter-spacing:.18em!important;color:#697381!important}
+.hero h1{font-size:27px!important;font-weight:700!important;letter-spacing:-.04em!important;margin:6px 0!important}
+.hero p{font-size:11px!important;color:#697381!important}
+.status{padding:0!important;border:0!important;background:none!important;min-width:auto!important}
+.status-value{font-size:10px!important;color:#697381!important}
+.status-dot{width:5px!important;height:5px!important}
+
+.kpis{display:none!important}
+.market-card{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  overflow:visible!important;border-radius:0!important
+}
+.market-head{
+  padding:0 2px 13px!important;border:0!important;
+  display:flex!important;align-items:end!important
+}
+.market-title{font-size:12px!important;font-weight:650!important}
+.market-sub{font-size:10px!important;color:#697381!important;margin-top:2px!important}
+.legend{display:none!important}
+
+/* Kill table presentation entirely */
+.table-wrap{display:none!important}
+
+/* Turn existing mobile-card structure into universal cards */
+.mobile-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:9px!important;
+  padding:0!important
+}
+.mobile-card{
+  background:#0c1015!important;
+  border:1px solid #1a2028!important;
+  border-radius:12px!important;
+  padding:14px!important;
+  min-width:0!important;
+  transition:border-color .15s ease,transform .15s ease!important
+}
+.mobile-card:hover{border-color:#2b3440!important;transform:translateY(-1px)}
+.mobile-top{
+  display:flex!important;justify-content:space-between!important;
+  align-items:center!important;margin-bottom:13px!important
+}
+.mobile-top .etf-name{font-size:12px!important;font-weight:650!important;color:#edf0f3!important}
+.mobile-top .etf-code{font-size:9px!important;color:#606a77!important;margin-top:3px!important}
+.mobile-metrics{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:5px!important
+}
+.mobile-metric{
+  background:#11161d!important;
+  border-radius:7px!important;
+  padding:8px 3px!important;
+  text-align:center!important;
+  min-width:0!important
+}
+.mobile-metric label{
+  display:block!important;font-size:8px!important;
+  line-height:1!important;color:#606a77!important;
+  margin-bottom:6px!important;font-weight:600!important
+}
+.mobile-metric div{
+  font-size:11px!important;line-height:1!important;
+  font-weight:750!important;white-space:nowrap!important
+}
+
+/* NIFTY benchmark spans the board */
+.mobile-card:first-child{
+  grid-column:1/-1!important;
+  background:linear-gradient(135deg,#10161e,#0c1117)!important;
+  border-color:#26303b!important;
+  padding:16px!important
+}
+.mobile-card:first-child .mobile-top .etf-name{font-size:14px!important}
+.mobile-card:first-child .mobile-metric{
+  background:#151b23!important
+}
+.mobile-card:first-child .mobile-metric div{font-size:12px!important}
+
+.footer-note{text-align:left!important;font-size:9px!important;color:#4f5966!important;margin-top:10px!important}
+
+@media(max-width:760px){
+  .dashboard-shell{padding:20px 10px 34px!important}
+  .hero{padding-bottom:18px!important;margin-bottom:17px!important}
+  .hero h1{font-size:23px!important}
+  .mobile-grid{
+    grid-template-columns:1fr!important;
+    gap:7px!important
+  }
+  .mobile-card:first-child{grid-column:auto!important}
+}
+@media(max-width:430px){
+  .mobile-card{padding:12px!important}
+  .mobile-metric{padding:8px 1px!important}
+  .mobile-metric label{font-size:7px!important}
+  .mobile-metric div{font-size:10px!important}
+}
+</style>
+
+<style>
+/* Final visible card layout */
+.table-wrap,.desktop-table{display:none!important}
+.mobile-cards{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  width:100%;
+}
+.mcard{
+  display:block!important;
+  background:#0c1015!important;
+  border:1px solid #1b222b!important;
+  border-radius:12px!important;
+  padding:14px!important;
+  color:#eef2f6!important;
+}
+.mcard:first-child{
+  grid-column:1/-1;
+  background:#10161e!important;
+  border-color:#2a3440!important;
+}
+.mname{
+  font-size:13px!important;
+  font-weight:700!important;
+  color:#f2f4f7!important;
+  margin-bottom:11px!important;
+}
+.mgrid{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:5px!important;
+}
+.metric{
+  min-width:0!important;
+  border:0!important;
+  border-radius:7px!important;
+  padding:8px 3px!important;
+  text-align:center!important;
+}
+.metric-label{
+  font-size:8px!important;
+  line-height:1!important;
+  font-weight:600!important;
+  margin-bottom:5px!important;
+  opacity:.75;
+}
+.metric-value{
+  font-size:11px!important;
+  line-height:1!important;
+  font-weight:800!important;
+  white-space:nowrap!important;
+}
+.toolbar{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  margin-bottom:12px!important;
+}
+#status{font-size:10px!important;color:#697481!important}
+#refresh{
+  border:1px solid #252d36!important;
+  background:#0d1218!important;
+  color:#dce2e8!important;
+  border-radius:7px!important;
+  padding:7px 11px!important;
+}
+.nifty-box{
+  margin-bottom:12px!important;
+  padding:12px 14px!important;
+  background:#0d1218!important;
+  border:1px solid #1b222b!important;
+  border-radius:10px!important;
+}
+@media(max-width:760px){
+  .mobile-cards{
+    grid-template-columns:1fr!important;
+    gap:7px!important;
+  }
+  .mcard:first-child{grid-column:auto!important}
+  .mcard{padding:12px!important}
+  .mgrid{gap:4px!important}
+  .metric{padding:8px 1px!important}
+  .metric-label{font-size:7px!important}
+  .metric-value{font-size:10px!important}
+}
+@media(max-width:400px){
+  .mgrid{gap:3px!important}
+  .metric-value{font-size:9px!important}
+}
+</style>
 </head>
 
 <body>
-    <div class="dashboard-shell">
-        <div class="hero">
-            <div>
-                <div class="eyebrow">MARKET DATA</div>
-                <h1>ETF Performance</h1>
-                <p>Daily ETF vs NIFTY comparison</p>
-            </div>
-            <div class="status">
-                <div class="status-value"><span class="status-dot"></span>Live</div>
-            </div>
+<div class="dashboard-shell">
+
+<h2>📊 Daily ETF Performance vs NIFTY</h2>
+
+<div class="toolbar">
+  <div id="status">Ready</div>
+  <button id="refresh">Refresh</button>
+</div>
+
+<div id="error"></div>
+
+<div class="nifty-box">
+  <div class="nifty-label">NIFTY LEVEL</div>
+  <div id="niftyLevel" class="nifty-level">-</div>
+  <div id="niftyDate" class="nifty-date">As of -</div>
+</div>
+
+<div class="desktop-table table-wrap">
+<table>
+<thead>
+<tr>
+  <th>ETF</th>
+  <th>1D</th>
+  <th>1W</th>
+  <th>1M</th>
+  <th>3M</th>
+  <th>6M</th>
+</tr>
+</thead>
+<tbody id="tableBody">
+<tr><td colspan="6">Fetching data...</td></tr>
+</tbody>
+</table>
+</div>
+
+<div id="mobileCards" class="mobile-cards"></div>
+
+<footer>
+  1D = Day | 1W = Week | 1M = Month | 3M = 3 Months | 6M = 6 Months
+</footer>
+
+<script>
+/*
+ * ================================================================
+ * CLOUDFLARE WORKER
+ * ================================================================
+ *
+ * The Worker is the only external endpoint used by this page.
+ */
+const CLOUDFLARE_WORKER_URL =
+  "https://sweet-band-556b.johndoe775024.workers.dev/";
+
+/*
+ * ================================================================
+ * TICKERS
+ * ================================================================
+ *
+ * This follows the uploaded main.py list.
+ *
+ * NIFTY is kept as the benchmark and is always displayed first.
+ */
+const ASSETS = [
+  { name: "NIFTY", ticker: "NSE:NIFTY", original: "^NSEI", nifty: true },
+
+  { name: "TATAGOLD", ticker: "NSE:TATAGOLD", original: "TATAGOLD.NS" },
+  { name: "NIFTY100EW", ticker: "NSE:NIFTY100EW", original: "NIFTY100EW.NS" },
+  { name: "MAFANG", ticker: "NSE:MAFANG", original: "MAFANG.NS" },
+  { name: "MON100", ticker: "NSE:MON100", original: "MON100.NS" },
+  { name: "MOREALTY", ticker: "NSE:MOREALTY", original: "MOREALTY.NS" },
+  { name: "FMCGIETF", ticker: "NSE:FMCGIETF", original: "FMCGIETF.NS" },
+  { name: "IT", ticker: "NSE:ITBEES", original: "IT.NS" },
+  { name: "MOCAPITAL", ticker: "NSE:MOCAPITAL", original: "MOCAPITAL.NS" },
+  { name: "PVTBANKADD", ticker: "NSE:PVTBANKADD", original: "PVTBANKADD.NS" },
+  { name: "PHARMABEES", ticker: "NSE:PHARMABEES", original: "PHARMABEES.NS" },
+  { name: "ECAPINSURE", ticker: "NSE:ECAPINSURE", original: "ECAPINSURE.NS" },
+  { name: "AUTOIETF", ticker: "NSE:AUTOIETF", original: "AUTOIETF.NS" },
+  { name: "PSUBNKBEES", ticker: "NSE:PSUBNKBEES", original: "PSUBNKBEES.NS" },
+  { name: "OILIETF", ticker: "NSE:OILIETF", original: "OILIETF.NS" },
+  { name: "HEALTHY", ticker: "NSE:HEALTHY", original: "HEALTHY.NS" },
+  { name: "MID150CASE", ticker: "NSE:MID150CASE", original: "MID150CASE.NS" },
+  { name: "METALIETF", ticker: "NSE:METALIETF", original: "METALIETF.NS" },
+  { name: "ABSLPSE", ticker: "NSE:ABSLPSE", original: "ABSLPSE.NS" },
+  { name: "INFRAIETF", ticker: "NSE:INFRAIETF", original: "INFRAIETF.NS" }
+];
+
+/*
+ * ================================================================
+ * EXACT CALCULATION LOGIC FROM THE UPLOADED main.py
+ * ================================================================
+ *
+ * Historical lookbacks:
+ *   1D  = 1 calendar day
+ *   1W  = 7 calendar days
+ *   1M  = 30 calendar days
+ *   3M  = 90 calendar days
+ *   6M  = 180 calendar days
+ *
+ * For each target date:
+ *   choose the latest available trading close <= target date
+ *
+ * return = ((latest_close - previous_close) / previous_close) * 100
+ *
+ * This reproduces the logic in get_stock_diffs().
+ */
+const LOOKBACKS = [
+  { key: "dod", label: "1D", days: 1 },
+  { key: "wow", label: "1W", days: 7 },
+  { key: "mom", label: "1M", days: 30 },
+  { key: "threeM", label: "3M", days: 90 },
+  { key: "sixM", label: "6M", days: 180 }
+];
+
+function calculateReturn(latestClose, history, daysAgo) {
+  if (!Number.isFinite(latestClose) || !history.length) return null;
+
+  const latestTime = history[history.length - 1].time;
+  const targetTime =
+    new Date(latestTime).getTime() - daysAgo * 24 * 60 * 60 * 1000;
+
+  let previous = null;
+
+  for (const point of history) {
+    if (
+      point.time <= targetTime &&
+      Number.isFinite(point.close)
+    ) {
+      previous = point;
+    }
+  }
+
+  if (!previous || previous.close === 0) return null;
+
+  return ((latestClose - previous.close) / previous.close) * 100;
+}
+
+function normalizeHistory(history) {
+  if (!history) return [];
+
+  /*
+   * Supported response:
+   * [
+   *   { time: "2026-09-25", close: 100 },
+   *   ...
+   * ]
+   */
+  if (Array.isArray(history)) {
+    return history
+      .map(x => ({
+        time: new Date(x.time ?? x.date ?? x.t).getTime(),
+        close: Number(x.close ?? x.c)
+      }))
+      .filter(x => Number.isFinite(x.time) && Number.isFinite(x.close))
+      .sort((a,b) => a.time - b.time);
+  }
+
+  /*
+   * Supported response:
+   * {
+   *   dates: [...],
+   *   closes: [...]
+   * }
+   */
+  if (
+    Array.isArray(history.dates) &&
+    Array.isArray(history.closes)
+  ) {
+    return history.dates
+      .map((date, i) => ({
+        time: new Date(date).getTime(),
+        close: Number(history.closes[i])
+      }))
+      .filter(x => Number.isFinite(x.time) && Number.isFinite(x.close))
+      .sort((a,b) => a.time - b.time);
+  }
+
+  return [];
+}
+
+/*
+ * ================================================================
+ * SCANNER RESPONSE NORMALIZATION
+ * ================================================================
+ */
+function scannerPayload() {
+  return {
+    symbols: {
+      tickers: ASSETS.map(x => x.ticker),
+      query: { types: [] }
+    },
+
+    columns: [
+      "name",
+      "close",
+      "change",
+      "Perf.W",
+      "Perf.1M",
+      "Perf.3M",
+      "Perf.6M"
+    ]
+  };
+}
+
+/*
+ * The current Worker proxies Scanner requests. For exact 1D/1W/1M/
+ * 3M/6M logic from main.py, the Worker response needs to expose
+ * daily historical closes for each ticker.
+ *
+ * This parser supports:
+ *   data: [
+ *     {
+ *       s: "NSE:TATAGOLD",
+ *       d: [...],
+ *       history: [...]
+ *     }
+ *   ]
+ *
+ * It also supports a top-level histories object:
+ *   histories: {
+ *     "NSE:TATAGOLD": [...]
+ *   }
+ */
+function parseResponse(data) {
+  const rows = new Map();
+
+  const histories = data?.histories || {};
+
+  for (const row of (data?.data || [])) {
+    if (!Array.isArray(row?.d)) continue;
+
+    const ticker = String(
+      row.s || row.symbol || ""
+    ).toUpperCase();
+
+    rows.set(ticker, {
+      name: row.d[0] || "",
+      close: Number(row.d[1]),
+      change: Number(row.d[2]),
+      perfW: Number(row.d[3]),
+      perf1M: Number(row.d[4]),
+      perf3M: Number(row.d[5]),
+      perf6M: Number(row.d[6]),
+      history:
+        row.history ||
+        row.historical ||
+        histories[ticker] ||
+        histories[ticker.replace(/^NSE:/, "")] ||
+        []
+    });
+  }
+
+  return rows;
+}
+
+/*
+ * ================================================================
+ * COLOR LOGIC — EXACTLY THE NEW main.py VERSION
+ * ================================================================
+ *
+ * NIFTY row: neutral.
+ *
+ * ETF:
+ *   positive and >= NIFTY -> green
+ *   positive and <  NIFTY -> yellow
+ *   negative and >= NIFTY -> light red
+ *   negative and <  NIFTY -> dark red
+ */
+function performanceStyle(value, niftyValue, isNifty) {
+  if (!Number.isFinite(value)) {
+    return {
+      bg: "#f4f6fa",
+      fg: "#222"
+    };
+  }
+
+  if (isNifty) {
+    return {
+      bg: "#f4f6fa",
+      fg: "#222"
+    };
+  }
+
+  if (!Number.isFinite(niftyValue)) {
+    return {
+      bg: "#f4f6fa",
+      fg: "#222"
+    };
+  }
+
+  if (value >= 0 && value >= niftyValue) {
+    return {
+      bg: "#ccffcc",
+      fg: "#006600"
+    };
+  }
+
+  if (value >= 0 && value < niftyValue) {
+    return {
+      bg: "#fff2cc",
+      fg: "#7f6000"
+    };
+  }
+
+  if (value < 0 && value >= niftyValue) {
+    return {
+      bg: "#ffcccc",
+      fg: "#b30000"
+    };
+  }
+
+  return {
+    bg: "#8B0000",
+    fg: "white"
+  };
+}
+
+function formatPct(value) {
+  if (!Number.isFinite(value)) return "-";
+  return `${value >= 0 ? "+" : ""}${value.toFixed(2)}%`;
+}
+
+/*
+ * ================================================================
+ * FETCH AND CALCULATE
+ * ================================================================
+ */
+async function loadDashboard() {
+  const status = document.getElementById("status");
+  const error = document.getElementById("error");
+  const button = document.getElementById("refresh");
+
+  status.textContent = "Fetching...";
+  error.style.display = "none";
+  button.disabled = true;
+
+  try {
+    const response = await fetch(CLOUDFLARE_WORKER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(scannerPayload())
+    });
+
+    const raw = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      throw new Error(
+        `Worker returned non-JSON response (HTTP ${response.status}).`
+      );
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        data?.error || `Worker request failed: HTTP ${response.status}`
+      );
+    }
+
+    const scanner = parseResponse(data);
+
+    const rows = ASSETS.map(asset => {
+      const item = scanner.get(asset.ticker.toUpperCase()) || {};
+      const history = normalizeHistory(item.history);
+
+      const latestClose =
+        history.length
+          ? history[history.length - 1].close
+          : Number(item.close);
+
+      const result = {
+        ...asset,
+        close: latestClose,
+        history
+      };
+
+      /*
+       * Prefer historical closes when the Worker supplies them.
+       * Otherwise fall back to the TradingView Scanner performance
+       * fields, so the original working Scanner fetch still produces
+       * values without requiring a second historical-data endpoint.
+       *
+       * 1D  -> change
+       * 1W  -> Perf.W
+       * 1M  -> Perf.1M
+       * 3M  -> Perf.3M
+       * 6M  -> Perf.6M
+       */
+      if (history.length) {
+        for (const period of LOOKBACKS) {
+          result[period.key] = calculateReturn(
+            latestClose,
+            history,
+            period.days
+          );
+        }
+      } else {
+        result.dod = Number.isFinite(item.change) ? item.change : null;
+        result.wow = Number.isFinite(item.perfW) ? item.perfW : null;
+        result.mom = Number.isFinite(item.perf1M) ? item.perf1M : null;
+        result.threeM = Number.isFinite(item.perf3M) ? item.perf3M : null;
+        result.sixM = Number.isFinite(item.perf6M) ? item.perf6M : null;
+      }
+
+      return result;
+    });
+
+    render(rows);
+
+    const nifty = rows.find(x => x.nifty);
+
+    document.getElementById("niftyLevel").textContent =
+      Number.isFinite(nifty?.close)
+        ? Math.round(nifty.close).toLocaleString("en-IN")
+        : "-";
+
+    document.getElementById("niftyDate").textContent =
+      `As of ${new Date().toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      })}`;
+
+    status.textContent = "Data loaded";
+
+  } catch (e) {
+    console.error(e);
+    status.textContent = "Error";
+    error.textContent = e.message || "Failed to load data.";
+    error.style.display = "block";
+  } finally {
+    button.disabled = false;
+  }
+}
+
+/*
+ * ================================================================
+ * SORTING — EXACTLY THE NEW main.py RUN LOGIC
+ * ================================================================
+ *
+ * ETFs:
+ *   6M descending
+ *   then 3M descending
+ *   then 1M descending
+ *   then 1W descending
+ *   then 1D descending
+ *
+ * NIFTY is always first.
+ */
+function sortRows(rows) {
+  const nifty = rows.filter(x => x.nifty);
+  const etfs = rows.filter(x => !x.nifty);
+
+  etfs.sort((a, b) => {
+    const valuesA = [
+      a.sixM,
+      a.threeM,
+      a.mom,
+      a.wow,
+      a.dod
+    ];
+
+    const valuesB = [
+      b.sixM,
+      b.threeM,
+      b.mom,
+      b.wow,
+      b.dod
+    ];
+
+    for (let i = 0; i < valuesA.length; i++) {
+      const av = Number.isFinite(valuesA[i])
+        ? valuesA[i]
+        : -Infinity;
+
+      const bv = Number.isFinite(valuesB[i])
+        ? valuesB[i]
+        : -Infinity;
+
+      if (av !== bv) return bv - av;
+    }
+
+    return 0;
+  });
+
+  return [...nifty, ...etfs];
+}
+
+/*
+ * ================================================================
+ * RENDER TABLE
+ * ================================================================
+ */
+function render(rows) {
+  const sorted = sortRows(rows);
+
+  const nifty = sorted.find(x => x.nifty);
+
+  document.getElementById("tableBody").innerHTML =
+    sorted.map(row => {
+      if (row.error) {
+        return `
+          <tr>
+            <td colspan="6" class="error">
+              ${escapeHTML(row.name)}: ${escapeHTML(row.error)}
+            </td>
+          </tr>
+        `;
+      }
+
+      const values = [
+        ["dod", row.dod],
+        ["wow", row.wow],
+        ["mom", row.mom],
+        ["threeM", row.threeM],
+        ["sixM", row.sixM]
+      ];
+
+      let html = `
+        <tr>
+          <td class="asset"
+              style="font-weight:${row.nifty ? "bold" : "normal"}">
+            ${escapeHTML(row.nifty ? "NIFTY" : row.name)}
+          </td>
+      `;
+
+      for (const [key, value] of values) {
+        const style = performanceStyle(
+          value,
+          nifty?.[key],
+          row.nifty
+        );
+
+        html += `
+          <td style="
+            background-color:${style.bg};
+            color:${style.fg};
+            font-weight:${row.nifty ? "bold" : "bold"};
+          ">
+            ${formatPct(value)}
+          </td>
+        `;
+      }
+
+      html += "</tr>";
+      return html;
+    }).join("");
+
+  renderMobile(sorted, nifty);
+}
+
+/*
+ * ================================================================
+ * MOBILE
+ * ================================================================
+ *
+ * Same sorted order and same colors as desktop.
+ */
+function renderMobile(rows, nifty) {
+  document.getElementById("mobileCards").innerHTML =
+    rows.map(row => {
+      const values = [
+        ["1D", "dod", row.dod],
+        ["1W", "wow", row.wow],
+        ["1M", "mom", row.mom],
+        ["3M", "threeM", row.threeM],
+        ["6M", "sixM", row.sixM]
+      ];
+
+      return `
+        <div class="mcard">
+          <div class="mname">
+            ${escapeHTML(row.nifty ? "NIFTY" : row.name)}
+          </div>
+
+          <div class="mgrid">
+            ${values.map(([label, key, value]) => {
+              const style = performanceStyle(
+                value,
+                nifty?.[key],
+                row.nifty
+              );
+
+              return `
+                <div class="metric"
+                     style="
+                       background:${style.bg};
+                       color:${style.fg};
+                     ">
+                  <div class="metric-label">${label}</div>
+                  <div class="metric-value">
+                    ${formatPct(value)}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
         </div>
+      `;
+    }).join("");
+}
 
-        <div class="market-card">
-            <div class="market-head">
-                <div>
-                    <div class="market-title">ETF Performance vs NIFTY</div>
-                    <div class="market-sub">Daily comparison</div>
-                </div>
-                <div class="legend">
-                    <span>ETF</span>
-                    <span>NIFTY</span>
-                </div>
-            </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Asset</th>
-                            <th>Price</th>
-                            <th>Change</th>
-                            <th>%</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="etf-name">NIFTY 50</div>
-                                <div class="etf-code">^NSEI</div>
-                            </td>
-                            <td>22,345.67</td>
-                            <td>+125.34</td>
-                            <td><span class="perf" style="background:#10b981;color:#fff;">+0.57%</span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="etf-name">Sensex</div>
-                                <div class="etf-code">^BSESN</div>
-                            </td>
-                            <td>73,456.89</td>
-                            <td>-234.56</td>
-                            <td><span class="perf" style="background:#ef4444;color:#fff;">-0.32%</span></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <div class="etf-name">HDFC Bank</div>
-                                <div class="etf-code">HDFCBANK.NS</div>
-                            </td>
-                            <td>1,680.45</td>
-                            <td>+45.67</td>
-                            <td><span class="perf" style="background:#10b981;color:#fff;">+2.78%</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
 
-            <div class="mobile-grid">
-                <div class="mobile-card">
-                    <div class="mobile-top">
-                        <div>
-                            <div class="etf-name">NIFTY 50</div>
-                            <div class="etf-code">^NSEI</div>
-                        </div>
-                        <div style="text-align:right">22,345.67</div>
-                    </div>
-                    <div class="mobile-metrics">
-                        <div class="mobile-metric">
-                            <label>Change</label>
-                            <div style="color:#10b981">+125.34</div>
-                        </div>
-                        <div class="mobile-metric">
-                            <label>%</label>
-                            <div style="color:#10b981">+0.57%</div>
-                        </div>
-                        <div class="mobile-metric">
-                            <label>Day High</label>
-                            <div>22,456.78</div>
-                        </div>
-                        <div class="mobile-metric">
-                            <label>Day Low</label>
-                            <div>22,123.45</div>
-                        </div>
-                        <div class="mobile-metric">
-                            <label>Volume</label>
-                            <div>2.3M</div>
-                        </div>
-                    </div>
-                </div>
+document.getElementById("refresh").addEventListener(
+  "click",
+  loadDashboard
+);
 
-                <div class="mobile-card">
-                    <div class="mobile-top">
-                        <div>
-                            <div class="etf-name">Sensex</div>
-                            <div class="etf-code">^BSESN</div>
-                        </div>
-                        <div style="text-align:right">73,456.89</div>
-                    </div>
-                    <div class="mobile-metrics">
-                        <div class="mobile-metric">
-                            <label>Change</label>
-                            <div style="color:#ef4444">-234.56</div>
-                        </div>
-                        <div class="mobile-metric">
-                            <label>%</label>
-                            <div style="color:#ef4444">-0.32%</div>
-                        </div>
-                        <div class="mobile-metric">
-                            <label>Day High</label>
-                            <div>73,567.23</div>
-                        </div>
-                        <div class="mobile-metric">
-                            <label>Day Low</label>
-                            <div>73,234.56</div>
-                        </div>
-                        <div class="mobile-metric">
-                            <label>Volume</label>
-                            <div>1.8M</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+window.addEventListener(
+  "DOMContentLoaded",
+  loadDashboard
+);
+</script>
 
-            <div class="footer-note">Updated 2 minutes ago</div>
-        </div>
-    </div>
-</body>
-
+</div></body>
 </html>
